@@ -79,7 +79,7 @@ instantiateChaincode() {
   setGlobals $PEER $ORG
 
   set -x
-  peer chaincode instantiate -o orderer1.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["InitSupplies"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
+  peer chaincode instantiate -o orderer1.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["InitLedger"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
   set +x
 
   echo "===================== Chaincode is instantiated on peer${PEER}.org${ORG} on channel '$CHANNEL_NAME' ===================== "

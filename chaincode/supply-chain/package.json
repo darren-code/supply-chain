@@ -1,5 +1,5 @@
 {
-    "name": "asset-transfer-basic",
+    "name": "supply-chain",
     "version": "1.0.0",
     "description": "Asset-Transfer-Basic contract implemented in JavaScript",
     "main": "index.js",

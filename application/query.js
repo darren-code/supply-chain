@@ -37,7 +37,7 @@ async function main() {
             configdata["smart_contract_name"]
         );
 
-        const result = await contract.evaluateTransaction("GetAllAssets");
+        const result = await contract.evaluateTransaction("GetAllSupplies");
         console.log(
             `Transaction has been evaluated, result is : ${result.toString()}`
         );

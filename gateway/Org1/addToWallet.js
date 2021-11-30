@@ -12,7 +12,7 @@ async function main() {
     try {
         const credPath = path.join(fixtures, '/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com');
         const cert = fs.readFileSync(path.join(credPath, '/msp/signcerts/Admin@org1.example.com-cert.pem')).toString();
-        const key = fs.readFileSync(path.join(credPath, '/msp/keystore/9b5a4dc9f72dd4febf2970d9c47cb0973a6815cc98420d94ecda4a5408bf3e98_sk')).toString();
+        const key = fs.readFileSync(path.join(credPath, '/msp/keystore/5fa782a40c7cd41a5be87710a12d7db70988a3fb52a2d5e9609bf456d15eeef6_sk')).toString();
 
         const identityLabel = 'Admin@org1.example.com';
         const identity = X509WalletMixin.createIdentity('Org1MSP', cert, key);
