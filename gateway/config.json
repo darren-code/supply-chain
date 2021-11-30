@@ -1,0 +1,7 @@
+{
+    "wallet": "../gateway/Org1/wallet",
+    "connection_profile_filename":"../gateway/Org1/connection-org1.json",
+    "channel_name":"mychannel",
+    "smart_contract_name":"mycc",
+    "peerForEventsSubscription": "peer1.org1.example.com:7051"
+}

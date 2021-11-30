@@ -1,0 +1,8 @@
+application/node_modules/*
+application/package-lock.json
+chaincode/supply-chain/node_modules/*
+chaincode/supply-chain/package-lock.json
+gateway/Org1/node_modules/*
+gateway/Org2/node_modules/*
+gateway/Org1/package-lock.json
+gateway/Org2/package-lock.json
