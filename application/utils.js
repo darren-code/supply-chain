@@ -116,7 +116,7 @@ utils.evalTx = async(contract, txName, ...args) => {
     });
 }
 
-utils.registerUser = async (userid, userpwd, usertype, adminIdentity) => {
+utils.registerUser = async (userid, userpwd, usertype, adminIdentity, agent, items) => {
     console.log("\n------------ utils.registerUser ---------------");
     console.log("\n userid: " + userid + ", pwd: " + userpwd + ", usertype: " + usertype + ", identity: " + adminIdentity);
 
@@ -137,7 +137,9 @@ utils.registerUser = async (userid, userpwd, usertype, adminIdentity) => {
         attrs: [{
             "name": "usertype",
             "value": usertype,
-            "ecert": true
+            "ecert": true,
+            "agent": agent,
+            "items": items,
         }],
         maxEnrollments: 1
     };
@@ -156,7 +158,7 @@ utils.registerUser = async (userid, userpwd, usertype, adminIdentity) => {
     });
 }
 
-utils.enrollUser = async (userid, userpwd, usertype) => {
+utils.enrollUser = async (userid, userpwd, usertype, agent, items) => {
     console.log("\n------------ utils.enrollUser -----------------");
     console.log("userid: " + userid + ", pwd: " + userpwd + ", usertype: " + usertype);
 
@@ -172,7 +174,9 @@ utils.enrollUser = async (userid, userpwd, usertype) => {
         attrs: [{
             "name": "usertype",
             "value": usertype,
-            "ecert": true
+            "ecert": true,
+            "agent": agent,
+            "items": items,
         }]
     };
 
@@ -268,6 +272,8 @@ utils.getAllUsers = async (adminIdentity) => {
         tmp = {};
         tmp.id = identities[i].id;
         tmp.usertype = "";
+        tmp.agent = "";
+        tmp.items = 0;
 
         if (tmp.id == "admin" || tmp.id == "Admin@org1.example.com" || tmp.id == " Admin@org2.example.com") {
             tmp.usertype = tmp.id;
@@ -278,11 +284,68 @@ utils.getAllUsers = async (adminIdentity) => {
                     tmp.usertype = attributes[j].value;
                     break;
                 }
+                if (attributes[j].name == "agent") {
+                    tmp.agent = attributes[j].agent;
+                    break;
+                }
+                if (attributes[j].name == "items") {
+                    tmp.items = attributes[j].items;
+                    break;
+                }
             }
         }
         result.push(tmp);
     }
     return result;
+}
+
+utils.updateUserAttributes = async (auserid, dminIdentity, agent, items) => {
+    console.log(">>>getUser...");
+    const gateway = new Gateway();
+    await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: true } });
+
+    let client = gateway.getClient();
+    let fabric_ca_client = client.getCertificateAuthority();
+    let idService = fabric_ca_client.newIdentityService();
+    // let user = await idService.getOne(userid, gateway.getCurrentIdentity());
+    // let result = {"id": userid};
+
+    // if (userid == "admin" || userid == "Admin@org1.example.com" || userid == " Admin@org2.example.com") {
+    //     result.usertype = userid;
+    // } else {
+    //     let j = 0;
+    //     while (user.result.attrs[j].name !== "usertype") j++;
+    //     result.usertype = user.result.attrs[j].value;
+    // }
+
+    // console.log(result);
+    // return Promise.resolve(result);
+
+    // const gateway = new Gateway();
+    // await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: true } });
+
+    // const orgs = ccp.organizations;
+    // const CAs = ccp.certificateAuthorities;
+    // const fabricCAKey = orgs[orgMSPID].certificateAuthorities[0];
+    // const caURL = CAs[fabricCAKey].url;
+    // const ca = new FabricCAServices(caURL, { trustedRoots: [], verify: false });
+
+    var userDetails = {
+        enrollmentID: userid,
+        // enrollmentSecret: userpwd,
+        // role: "client",
+        affiliation: orgMSPID.toLowerCase(),
+        attrs: [{
+            // "name": "usertype",
+            // "value": usertype,
+            "ecert": true,
+            "agent": agent,
+            "items": items,
+        }],
+        maxEnrollments: 1
+    };
+
+    return await idService.update(userId, userDetails, adminIdentity);
 }
 
 module.exports = utils;

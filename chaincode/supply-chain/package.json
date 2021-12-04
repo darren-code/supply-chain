@@ -1,7 +1,7 @@
 {
     "name": "supply-chain",
     "version": "1.0.0",
-    "description": "Asset-Transfer-Basic contract implemented in JavaScript",
+    "description": "Supply-Chain contract implemented in JavaScript",
     "main": "index.js",
     "engines": {
         "node": ">=8",
