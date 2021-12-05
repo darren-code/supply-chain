@@ -14,6 +14,7 @@ class SupplyChain extends Contract {
                 Name: 'Broccoli',
                 Condition: 'Mildly Fresh',
                 Location: 'Jakarta Distribution Center',
+                Confirm: false
             },
             {
                 ID: 'supply2',
@@ -22,6 +23,7 @@ class SupplyChain extends Contract {
                 Name: 'Garlic',
                 Condition: 'Very Fresh',
                 Location: 'Madiun Green Farm',
+                Confirm: true
             },
         ]
 
@@ -32,38 +34,23 @@ class SupplyChain extends Contract {
         }
     }
 
-    async AddSupply(ctx, id, unit, amount, owner, humidity, temperature, oxygen, carbondioxide, category, name, long, lat, site, date, time) {
+    async AddSupply(ctx, id, amount, owner, name, condition, location, confirm) {
         let usertype = await this.getCurrentUserType(ctx);
-        if (usertype != "admin") {
-            throw new Error(`This user does have access to create an supply`);
-        }
-
         const exists = await this.IsSupplyExist(ctx, id)
         if (exists) {
             throw new Error(`The supply ${id} already exists`)
         }
-
         const supply = {
             ID: id,
-            Unit: unit,
-            Amount: amount,
+            Amount: amount, 
             Owner: owner,
-            Humidity: humidity,
-            Temperature: temperature,
-            Oxygen: oxygen,
-            CO: carbondioxide,
-            Type: category,
             Name: name,
-            Longitude: long,
-            Latitude: lat,
-            Site: site,
-            Date: date,
-            Time: time,
+            Condition: condition,
+            Location: location,
+            Confirm: confirm
         }
-
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(supply)))
         await ctx.stub.setEvent(EVENT_NAME, Buffer.from(JSON.stringify(supply)))
-
         return JSON.stringify(supply)
     }
 
@@ -75,11 +62,11 @@ class SupplyChain extends Contract {
         return supplyJSON.toString()
     }
 
-    async UpdateSupply(ctx, id, id, unit, amount, owner, humidity, temperature, oxygen, carbondioxide, category, name, long, lat, site, date, time) {
+    async UpdateSupply(ctx, id, amount, owner, name, condition, location, confirm) {
         let usertype = await this.getCurrentUserType(ctx);
-        if (usertype != "admin") {
-            throw new Error(`This user does have access to create an supply`);
-        }
+        // if (usertype != "admin") {
+        //     throw new Error(`This user does have access to edit a supply`);
+        // }
 
         const exists = await this.IsSupplyExist(ctx, id)
         if (!exists) {
@@ -88,20 +75,12 @@ class SupplyChain extends Contract {
 
         const updatedSupply = {
             ID: id,
-            Unit: unit,
-            Amount: amount,
+            Amount: amount, 
             Owner: owner,
-            Humidity: humidity,
-            Temperature: temperature,
-            Oxygen: oxygen,
-            CO: carbondioxide,
-            Type: category,
             Name: name,
-            Longitude: long,
-            Latitude: lat,
-            Site: site,
-            Date: date,
-            Time: time,
+            Condition: condition,
+            Location: location,
+            Confirm: confirm
         }
 
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(updatedSupply)))
@@ -112,9 +91,9 @@ class SupplyChain extends Contract {
 
     async RemoveSupply(ctx, id) {
         let usertype = await this.getCurrentUserType(ctx);
-        if (usertype != "admin") {
-            throw new Error(`This user does have access to create an supply`);
-        }
+        // if (usertype != "admin") {
+        //     throw new Error(`This user does have access to delete a supply`);
+        // }
 
         const exists = await this.IsSupplyExist(ctx, id)
         if (!exists) {
@@ -133,13 +112,29 @@ class SupplyChain extends Contract {
 
     async TransferSupply(ctx, id, newOwner) {
         let usertype = await this.getCurrentUserType(ctx);
-        if (usertype != "admin") {
-            throw new Error(`This user does have access to create an supply`);
-        }
+        // if (usertype != "admin") {
+        //     throw new Error(`This user does have access to transfer this supply`);
+        // }
         
         const supplyString = await this.GetSupply(ctx, id)
         const supply = JSON.parse(supplyString)
         supply.Owner = newOwner
+        
+        await ctx.stub.putState(id, Buffer.from(JSON.stringify(supply)))
+        await ctx.stub.setEvent(EVENT_NAME, Buffer.from(JSON.stringify(supply)))
+
+        return true
+    }
+
+    async ConfirmSupply(ctx, id) {
+        let usertype = await this.getCurrentUserType(ctx);
+        // if (usertype != "admin") {
+        //     throw new Error(`This user does have access to confirm a supply`);
+        // }
+        
+        const supplyString = await this.GetSupply(ctx, id)
+        const supply = JSON.parse(supplyString)
+        supply.Confirm = true
         
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(supply)))
         await ctx.stub.setEvent(EVENT_NAME, Buffer.from(JSON.stringify(supply)))

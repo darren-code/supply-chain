@@ -116,9 +116,9 @@ utils.evalTx = async(contract, txName, ...args) => {
     });
 }
 
-utils.registerUser = async (userid, userpwd, usertype, adminIdentity) => {
+utils.registerUser = async (userid, userpwd, items, adminIdentity) => {
     console.log("\n------------ utils.registerUser ---------------");
-    console.log("\n userid: " + userid + ", pwd: " + userpwd + ", usertype: " + usertype + ", identity: " + adminIdentity);
+    console.log("\n userid: " + userid + ", pwd: " + userpwd + ", usertype: " + items + ", identity: " + adminIdentity);
 
     const gateway = new Gateway();
     await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: true } });
@@ -135,9 +135,9 @@ utils.registerUser = async (userid, userpwd, usertype, adminIdentity) => {
         role: "client",
         affiliation: orgMSPID.toLowerCase(),
         attrs: [{
-            "name": "usertype",
-            "value": usertype,
-            "ecert": true
+            "name": "items",
+            "value": items,
+            "ecert": true,
         }],
         maxEnrollments: 1
     };
@@ -156,7 +156,7 @@ utils.registerUser = async (userid, userpwd, usertype, adminIdentity) => {
     });
 }
 
-utils.enrollUser = async (userid, userpwd, usertype) => {
+utils.enrollUser = async (userid, userpwd, items) => {
     console.log("\n------------ utils.enrollUser -----------------");
     console.log("userid: " + userid + ", pwd: " + userpwd + ", usertype: " + usertype);
 
@@ -170,9 +170,9 @@ utils.enrollUser = async (userid, userpwd, usertype) => {
         enrollmentID: userid,
         enrollmentSecret: userpwd,
         attrs: [{
-            "name": "usertype",
-            "value": usertype,
-            "ecert": true
+            "name": "items",
+            "value": items,
+            "ecert": true,
         }]
     };
 
@@ -268,6 +268,8 @@ utils.getAllUsers = async (adminIdentity) => {
         tmp = {};
         tmp.id = identities[i].id;
         tmp.usertype = "";
+        tmp.agent = "";
+        tmp.items = 0;
 
         if (tmp.id == "admin" || tmp.id == "Admin@org1.example.com" || tmp.id == " Admin@org2.example.com") {
             tmp.usertype = tmp.id;
@@ -278,11 +280,44 @@ utils.getAllUsers = async (adminIdentity) => {
                     tmp.usertype = attributes[j].value;
                     break;
                 }
+                if (attributes[j].name == "agent") {
+                    tmp.agent = attributes[j].agent;
+                    break;
+                }
+                if (attributes[j].name == "items") {
+                    tmp.items = attributes[j].items;
+                    break;
+                }
             }
         }
         result.push(tmp);
     }
     return result;
+}
+
+utils.updateUserAttributes = async (userId, adminIdentity, items) => {
+    console.log(">>>getUser...");
+    const gateway = new Gateway();
+    await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: true } });
+
+    let client = gateway.getClient();
+    let fabric_ca_client = client.getCertificateAuthority();
+    let idService = fabric_ca_client.newIdentityService();
+
+    var userDetails = {
+        enrollmentID: userId,
+        // enrollmentSecret: userpwd,
+        // role: "client",
+        affiliation: orgMSPID.toLowerCase(),
+        attrs: [{
+            "name": "items",
+            "value": items,
+            "ecert": true,
+        }],
+        maxEnrollments: 1
+    };
+
+    return await idService.update(userId, userDetails, gateway.getCurrentIdentity());
 }
 
 module.exports = utils;
