@@ -116,9 +116,9 @@ utils.evalTx = async(contract, txName, ...args) => {
     });
 }
 
-utils.registerUser = async (userid, userpwd, usertype, adminIdentity, agent, items) => {
+utils.registerUser = async (userid, userpwd, items, adminIdentity) => {
     console.log("\n------------ utils.registerUser ---------------");
-    console.log("\n userid: " + userid + ", pwd: " + userpwd + ", usertype: " + usertype + ", identity: " + adminIdentity);
+    console.log("\n userid: " + userid + ", pwd: " + userpwd + ", usertype: " + items + ", identity: " + adminIdentity);
 
     const gateway = new Gateway();
     await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: true } });
@@ -135,11 +135,9 @@ utils.registerUser = async (userid, userpwd, usertype, adminIdentity, agent, ite
         role: "client",
         affiliation: orgMSPID.toLowerCase(),
         attrs: [{
-            "name": "usertype",
-            "value": usertype,
+            "name": "items",
+            "value": items,
             "ecert": true,
-            "agent": agent,
-            "items": items,
         }],
         maxEnrollments: 1
     };
@@ -158,7 +156,7 @@ utils.registerUser = async (userid, userpwd, usertype, adminIdentity, agent, ite
     });
 }
 
-utils.enrollUser = async (userid, userpwd, usertype, agent, items) => {
+utils.enrollUser = async (userid, userpwd, items) => {
     console.log("\n------------ utils.enrollUser -----------------");
     console.log("userid: " + userid + ", pwd: " + userpwd + ", usertype: " + usertype);
 
@@ -172,11 +170,9 @@ utils.enrollUser = async (userid, userpwd, usertype, agent, items) => {
         enrollmentID: userid,
         enrollmentSecret: userpwd,
         attrs: [{
-            "name": "usertype",
-            "value": usertype,
+            "name": "items",
+            "value": items,
             "ecert": true,
-            "agent": agent,
-            "items": items,
         }]
     };
 
@@ -299,7 +295,7 @@ utils.getAllUsers = async (adminIdentity) => {
     return result;
 }
 
-utils.updateUserAttributes = async (auserid, dminIdentity, agent, items) => {
+utils.updateUserAttributes = async (userId, adminIdentity, items) => {
     console.log(">>>getUser...");
     const gateway = new Gateway();
     await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: true } });
@@ -307,45 +303,21 @@ utils.updateUserAttributes = async (auserid, dminIdentity, agent, items) => {
     let client = gateway.getClient();
     let fabric_ca_client = client.getCertificateAuthority();
     let idService = fabric_ca_client.newIdentityService();
-    // let user = await idService.getOne(userid, gateway.getCurrentIdentity());
-    // let result = {"id": userid};
-
-    // if (userid == "admin" || userid == "Admin@org1.example.com" || userid == " Admin@org2.example.com") {
-    //     result.usertype = userid;
-    // } else {
-    //     let j = 0;
-    //     while (user.result.attrs[j].name !== "usertype") j++;
-    //     result.usertype = user.result.attrs[j].value;
-    // }
-
-    // console.log(result);
-    // return Promise.resolve(result);
-
-    // const gateway = new Gateway();
-    // await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: true } });
-
-    // const orgs = ccp.organizations;
-    // const CAs = ccp.certificateAuthorities;
-    // const fabricCAKey = orgs[orgMSPID].certificateAuthorities[0];
-    // const caURL = CAs[fabricCAKey].url;
-    // const ca = new FabricCAServices(caURL, { trustedRoots: [], verify: false });
 
     var userDetails = {
-        enrollmentID: userid,
+        enrollmentID: userId,
         // enrollmentSecret: userpwd,
         // role: "client",
         affiliation: orgMSPID.toLowerCase(),
         attrs: [{
-            // "name": "usertype",
-            // "value": usertype,
+            "name": "items",
+            "value": items,
             "ecert": true,
-            "agent": agent,
-            "items": items,
         }],
         maxEnrollments: 1
     };
 
-    return await idService.update(userId, userDetails, adminIdentity);
+    return await idService.update(userId, userDetails, gateway.getCurrentIdentity());
 }
 
 module.exports = utils;

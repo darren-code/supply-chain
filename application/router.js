@@ -96,7 +96,8 @@ sampleNetworkRouter.route('/add-supply').post(function (request, response) {
                 request.body.owner,
                 request.body.name,
                 request.body.condition,
-                request.body.location).then((result) => {
+                request.body.location,
+                request.body.confirm).then((result) => {
         response.status(STATUS_SUCCESS);
         response.setHeader('Content-Type', 'application/json');
         response.send(JSON.parse(result));
@@ -124,7 +125,8 @@ sampleNetworkRouter.route('/update-supply').put(function (request, response) {
                 request.body.owner,
                 request.body.name,
                 request.body.condition,
-                request.body.location).then((result) => {
+                request.body.location,
+                request.body.confirm).then((result) => {
         response.status(STATUS_SUCCESS);
         response.send(result);
     }, (error) => {
@@ -157,11 +159,10 @@ sampleNetworkRouter.route('/register-user').post(function (request, response) {
     try {
         let userId = request.body.userid;
         let userPwd = request.body.password;
-        let userType = request.body.usertype;
-        let name = request.body.name;
+        let items = request.body.items;
 
         getUsernamePassword(request).then(request => {
-            utils.registerUser(userId, userPwd, userType, request.username, name).then((result) => {
+            utils.registerUser(userId, userPwd, items, request.username).then((result) => {
                 response.status(STATUS_SUCCESS);
                 response.send(result);
             }, (error) => {
@@ -179,9 +180,9 @@ sampleNetworkRouter.route('/register-user').post(function (request, response) {
 });
 
 sampleNetworkRouter.route('/enroll-user/').post(function (request, response) {
-    let userType = request.body.usertype;
+    let items = request.body.items;
     getUsernamePassword(request).then(request => {
-        utils.enrollUser(request.username, request.password, userType).then(result => {
+        utils.enrollUser(request.username, request.password, items).then(result => {
             response.status(STATUS_SUCCESS);
             response.send(result);
         }, error => {
@@ -251,11 +252,11 @@ sampleNetworkRouter.route('/users/:id').get(function (request, response) {
     }));
 });
 
-sampleNetworkRouter.route('/update-user/:id').get(function (request, response) {
+sampleNetworkRouter.route('/update-user/:id').put(function (request, response) {
     getUsernamePassword(request).then(request => {
         utils.isUserEnrolled(request.params.id).then(result1 => {
             if (result1) {
-                utils.updateUserAttributes(request.params.id, request.username, request.body.agent, request.body.items).then(result2 => {
+                utils.updateUserAttributes(request.params.id, request.username, request.body.items).then(result2 => {
                     response.status(STATUS_SUCCESS);
                     response.send(result2);
                 }, (error) => {
@@ -275,6 +276,16 @@ sampleNetworkRouter.route('/update-user/:id').get(function (request, response) {
         response.status(STATUS_CLIENT_ERROR);
         response.send(utils.prepareErrorResponse(error, INVALID_HEADER, "Invalid header"));
     }));
+});
+
+sampleNetworkRouter.route('/confirm').put(function (request, response) {
+    submitTx(request, 'ConfirmSupply', request.body.id).then((result) => {
+        response.status(STATUS_SUCCESS);
+        response.send(result);
+    }, (error) => {
+        response.status(STATUS_SERVER_ERROR);
+        response.send(utils.prepareErrorResponse(error, STATUS_SERVER_ERROR, "There was a problem on transferring the supply, ", request.params.id));
+    });
 });
 
 module.exports = sampleNetworkRouter;
